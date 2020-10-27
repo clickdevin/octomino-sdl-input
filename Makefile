@@ -1,5 +1,5 @@
 NAME     = Octomino's SDL Input
-VERSION  = 0.1.0-dev
+VERSION  = 0.1.0
 REPO     = https://github.com/clickdevin/octomino-sdl-input
 BIN      = octomino-sdl-input.dll
 
