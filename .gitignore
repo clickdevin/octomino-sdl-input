@@ -1,0 +1,4 @@
+*.o
+*.dll
+*.zip
+gamecontrollerdb.txt
