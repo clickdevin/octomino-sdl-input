@@ -102,10 +102,7 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 
 //EXPORT void CALL ReadController(int Control, BYTE * Command) {}
 
-EXPORT void CALL RomClosed(void)
-{
-    close_controller();
-}
+//EXPORT void CALL RomClosed(void) {}
 
 EXPORT void CALL RomOpen(void)
 {
