@@ -109,18 +109,28 @@ void close_controller(void)
     joy_inst = -1;
 }
 
-int8_t deadzone(int8_t val, int8_t dz)
+int16_t threshold(int16_t val, int16_t cutoff)
 {
     if (val < 0)
-        return val >= -dz ? 0 : val;
+        return val >= -cutoff ? 0 : val;
     else
-        return val <= dz ? 0 : val;
+        return val <= cutoff ? 0 : val;
+}
+
+int16_t scale_and_deadzone(int16_t val, int16_t dz, int16_t fz, int16_t max)
+{
+    if (threshold(val, dz) == 0) return 0;
+
+    float f = (float)(abs(val) - dz) / (32767 - dz - fz);
+    if (f > 1.f) f = 1.f;
+
+    float sign = abs(val) / val;
+
+    return f * max * sign;
 }
 
 void get_inputs(inputs_t *i)
 {
-    i->value = 0;
-
     if (!initialized)
     {
         try_init();
@@ -170,9 +180,9 @@ static inline int16_t sclamp(int16_t val, int16_t min, int16_t max)
     return val;
 }
 
-static inline int8_t get_axis(SDL_GameControllerAxis a)
+static inline int16_t get_axis(SDL_GameControllerAxis a)
 {
-    return (int8_t)sclamp(SDL_GameControllerGetAxis(con, a) / 256, -127, 127);
+    return sclamp(SDL_GameControllerGetAxis(con, a), -32767, 32767);
 }
 
 void write_inputs(inputs_t *i)

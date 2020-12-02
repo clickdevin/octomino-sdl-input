@@ -29,45 +29,43 @@ extern char dbpath[PATH_MAX];
     "\n\nLicensed under the Mozilla Public License 2.0" \
     "\n(http://mozilla.org/MPL/2.0/)"
 
-typedef union
+typedef struct
 {
-    uint64_t value;
-    struct {
-        unsigned a      : 1;
-        unsigned b      : 1;
-        unsigned x      : 1;
-        unsigned y      : 1;
+    uint16_t a       : 1;
+    uint16_t b       : 1;
+    uint16_t x       : 1;
+    uint16_t y       : 1;
 
-        unsigned back   : 1;
-        unsigned guide  : 1;
-        unsigned start  : 1;
+    uint16_t back    : 1;
+    uint16_t guide   : 1;
+    uint16_t start   : 1;
 
-        unsigned lstick : 1;
-        unsigned rstick : 1;
-        unsigned lshoul : 1;
-        unsigned rshoul : 1;
+    uint16_t lstick  : 1;
+    uint16_t rstick  : 1;
+    uint16_t lshoul  : 1;
+    uint16_t rshoul  : 1;
 
-        unsigned dup    : 1;
-        unsigned ddown  : 1;
-        unsigned dleft  : 1;
-        unsigned dright : 1;
+    uint16_t dup     : 1;
+    uint16_t ddown   : 1;
+    uint16_t dleft   : 1;
+    uint16_t dright  : 1;
 
-        unsigned pad    : 1;
+    int16_t alx;
+    int16_t aly;
 
-        signed   alx    : 8;
-        signed   aly    : 8;
-        signed   arx    : 8;
-        signed   ary    : 8;
-        signed   altrig : 8;
-        signed   artrig : 8;
-    };
+    int16_t arx;
+    int16_t ary;
+
+    int16_t altrig;
+    int16_t artrig;
 } inputs_t;
 
 void init(void);
 void deinit(void);
 void open_controller(void);
 void close_controller(void);
-int8_t deadzone(int8_t val, int8_t dz);
+int16_t threshold(int16_t val, int16_t cutoff);
+int16_t scale_and_deadzone(int16_t val, int16_t dz, int16_t fz, int16_t max);
 void get_inputs(inputs_t *i);
 
 void write_inputs(inputs_t *i);

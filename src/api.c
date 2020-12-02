@@ -66,8 +66,9 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo)
 
 EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 {
-    inputs_t i;
+    inputs_t i = {0};
     get_inputs(&i);
+
     Keys->Value = 0;
 
     Keys->R_DPAD = i.dright;
@@ -75,19 +76,19 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->D_DPAD = i.ddown;
     Keys->U_DPAD = i.dup;
     Keys->START_BUTTON = i.start;
-    Keys->Z_TRIG = deadzone(i.altrig, 63) > 0;
+    Keys->Z_TRIG = threshold(i.altrig, 8192) > 0;
     Keys->A_BUTTON = i.a || i.b;
     Keys->B_BUTTON = i.x || i.y;
 
-    Keys->R_CBUTTON = deadzone(i.arx, 63) > 0;
-    Keys->L_CBUTTON = deadzone(i.arx, 63) < 0;
-    Keys->D_CBUTTON = deadzone(i.ary, 63) > 0;
-    Keys->U_CBUTTON = deadzone(i.ary, 63) < 0;
-    Keys->R_TRIG = deadzone(i.artrig, 63) > 0 || i.rshoul;
+    Keys->R_CBUTTON = threshold(i.arx, 8192) > 0;
+    Keys->L_CBUTTON = threshold(i.arx, 8192) < 0;
+    Keys->D_CBUTTON = threshold(i.ary, 8192) > 0;
+    Keys->U_CBUTTON = threshold(i.ary, 8192) < 0;
+    Keys->R_TRIG = threshold(i.artrig, 8192) > 0 || i.rshoul;
     Keys->L_TRIG = i.lshoul;
 
-    Keys->Y_AXIS = deadzone(i.alx, 23);
-    Keys->X_AXIS = -deadzone(i.aly, 23);
+    Keys->Y_AXIS = scale_and_deadzone(i.alx, 2048, 2048, 80 * 256) / 256;
+    Keys->X_AXIS = -scale_and_deadzone(i.aly, 2048, 2048, 80 * 256) / 256;
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
