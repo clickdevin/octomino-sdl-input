@@ -64,8 +64,8 @@ void init(void);
 void deinit(void);
 void open_controller(void);
 void close_controller(void);
-int16_t threshold(int16_t val, int16_t cutoff);
-int16_t scale_and_deadzone(int16_t val, int16_t dz, int16_t fz, int16_t max);
+int16_t threshold(int16_t val, float cutoff);
+int16_t scale_and_limit(int16_t val, int16_t max, float dz, float edge);
 void get_inputs(inputs_t *i);
 
 void write_inputs(inputs_t *i);

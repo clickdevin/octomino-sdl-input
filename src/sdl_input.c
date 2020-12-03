@@ -109,20 +109,22 @@ void close_controller(void)
     joy_inst = -1;
 }
 
-int16_t threshold(int16_t val, int16_t cutoff)
+int16_t threshold(int16_t val, float cutoff)
 {
     if (val < 0)
-        return val >= -cutoff ? 0 : val;
+        return val >= -(cutoff * 32767) ? 0 : val;
     else
-        return val <= cutoff ? 0 : val;
+        return val <= (cutoff * 32767) ? 0 : val;
 }
 
-int16_t scale_and_deadzone(int16_t val, int16_t dz, int16_t fz, int16_t max)
+int16_t scale_and_limit(int16_t val, int16_t max, float dz, float edge)
 {
-    if (threshold(val, dz) == 0) return 0;
+    // get abs value between 0 and 1 relative to deadzone and edge
+    float f = (abs(val) - dz * 32767) / (edge * 32767 - dz * 32767);
 
-    float f = (float)(abs(val) - dz) / (32767 - dz - fz);
+    // out of range
     if (f > 1.f) f = 1.f;
+    else if (f <= 0.f) return 0.f;
 
     float sign = abs(val) / val;
 
