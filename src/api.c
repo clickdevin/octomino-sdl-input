@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <Shlwapi.h>
 #include <stdio.h>
+#include <math.h>
 #include "zilmar_controller_1.0.h"
 #include "sdl_input.h"
 
@@ -64,6 +65,18 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo)
     );
 }
 
+static inline void n64_analog(BUTTONS *Keys, int16_t x, int16_t y)
+{
+    x = ((int32_t)x * 80) / 32767;
+    y = ((int32_t)y * 80) / 32767;
+
+    int16_t lim_x = 80 - (int16_t)ceil(abs(y) / 8.);
+    int16_t lim_y = 80 - (int16_t)ceil(abs(x) / 8.);
+
+    Keys->Y_AXIS = sclamp(x, -lim_x, lim_x);
+    Keys->X_AXIS = -sclamp(y, -lim_y, lim_y);
+}
+
 EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 {
     inputs_t i = {0};
@@ -87,8 +100,11 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->R_TRIG = threshold(i.artrig, 0.25f) > 0 || i.rshoul;
     Keys->L_TRIG = i.lshoul;
 
-    Keys->Y_AXIS = scale_and_limit(i.alx, 80 * 256, 0.05f, 0.95f) / 256;
-    Keys->X_AXIS = -scale_and_limit(i.aly, 80 * 256, 0.05f, 0.95f) / 256;
+    n64_analog(
+        Keys,
+        scale_and_limit(i.alx, 0.05f, 0.8f),
+        scale_and_limit(i.aly, 0.05f, 0.8f)
+    );
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])

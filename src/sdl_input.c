@@ -117,7 +117,7 @@ int16_t threshold(int16_t val, float cutoff)
         return val <= (cutoff * 32767) ? 0 : val;
 }
 
-int16_t scale_and_limit(int16_t val, int16_t max, float dz, float edge)
+int16_t scale_and_limit(int16_t val, float dz, float edge)
 {
     // get abs value between 0 and 1 relative to deadzone and edge
     float f = (abs(val) - dz * 32767) / (edge * 32767 - dz * 32767);
@@ -128,7 +128,14 @@ int16_t scale_and_limit(int16_t val, int16_t max, float dz, float edge)
 
     float sign = abs(val) / val;
 
-    return f * max * sign;
+    return sign * f * 32767;
+}
+
+int16_t sclamp(int16_t val, int16_t min, int16_t max)
+{
+    if (val <= min) return min;
+    if (val >= max) return max;
+    return val;
 }
 
 void get_inputs(inputs_t *i)
@@ -173,13 +180,6 @@ void get_inputs(inputs_t *i)
 static inline uint8_t get_but(SDL_GameControllerButton b)
 {
     return SDL_GameControllerGetButton(con, b);
-}
-
-static inline int16_t sclamp(int16_t val, int16_t min, int16_t max)
-{
-    if (val <= min) return min;
-    if (val >= max) return max;
-    return val;
 }
 
 static inline int16_t get_axis(SDL_GameControllerAxis a)
