@@ -70,8 +70,8 @@ static inline void n64_analog(BUTTONS *Keys, int16_t x, int16_t y)
     x = ((int32_t)x * 80) / 32767;
     y = ((int32_t)y * 80) / 32767;
 
-    int16_t lim_x = 80 - (int16_t)ceil(abs(y) / 8.);
-    int16_t lim_y = 80 - (int16_t)ceil(abs(x) / 8.);
+    int16_t lim_x = 80 - (int16_t)round(abs(sclamp(y, -70, 70)) / 7. - 1. / 7);
+    int16_t lim_y = 80 - (int16_t)round(abs(sclamp(x, -70, 70)) / 7. - 1. / 7);
 
     Keys->Y_AXIS = sclamp(x, -lim_x, lim_x);
     Keys->X_AXIS = -sclamp(y, -lim_y, lim_y);
