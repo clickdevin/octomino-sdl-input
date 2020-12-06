@@ -1,8 +1,8 @@
 Octomino's SDL Input Plugin
 ===========================
-An input plugin for Zilmar spec emulators including Project 64 1.6 and 
-later. It uses SDL2's GameController API and supports many gamepads 
-including Xbox, PS4, and Switch Pro.
+An input plugin for Zilmar spec emulators including Project 64 1.6. It 
+uses SDL2's GameController API and supports many gamepads including Xbox, 
+PS4, and Switch Pro.
 
 Currently, it will use the first valid controller it finds until it is 
 unplugged, then it will search for another. Future goals include device 
