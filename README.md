@@ -35,6 +35,8 @@ root directory.
 Other MinGW distributions will also likely work, provided you have the 
 proper tools installed.
 
+Additionally, `gamecontrollerdb.txt` can be updated using `make update-db`.
+
 License
 -------
 This plugin is licensed under the Mozilla Public License 2.0. See 

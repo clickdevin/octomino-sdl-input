@@ -5,11 +5,10 @@ BIN      = octomino-sdl-input.dll
 
 SRC      = $(wildcard src/*.c)
 
-DBFILE   = gamecontrollerdb.txt
 DBURL    = https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/master/gamecontrollerdb.txt
 
 ZIPNAME  = $(BIN:.dll=)-$(VERSION).zip
-ZIPFILES = $(BIN) $(DBFILE) LICENSE README.md CHANGELOG.md sources.zip
+ZIPFILES = $(BIN) LICENSE README.md CHANGELOG.md sources.zip gamecontrollerdb.txt
 ZIPSRC   = $(wildcard src/*.c) $(wildcard src/*.h) Makefile
 
 CC       = i686-w64-mingw32-gcc
@@ -26,9 +25,6 @@ $(BIN): $(SRC:.c=.o)
 
 -include $(SRC:.c=.d)
 
-$(DBFILE):
-	wget $(DBURL)
-
 $(ZIPNAME): $(ZIPFILES)
 	rm -f $@
 	zip $@ $^
@@ -36,9 +32,13 @@ $(ZIPNAME): $(ZIPFILES)
 sources.zip: $(ZIPSRC)
 	zip $@ $^
 
-.PHONY: all clean
+.PHONY: all update-db clean
 
-all: $(BIN) $(DBFILE) $(ZIPNAME)
+all: $(BIN) $(ZIPNAME)
+
+update-db:
+	rm -f gamecontrollerdb.txt
+	wget $(DBURL)
 
 clean:
-	rm -f $(BIN) $(SRC:.c=.o) $(SRC:.c=.d) $(DBFILE) $(ZIPNAME) sources.zip
+	rm -f $(BIN) $(SRC:.c=.o) $(SRC:.c=.d) $(ZIPNAME) sources.zip

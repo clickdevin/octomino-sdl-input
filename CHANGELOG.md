@@ -11,6 +11,7 @@ Version History
  - Deadzone has been lowered to 5%
  - Trigger and joystick activation thresholds for digital outputs have 
    been lowered to 25%
+ - `gamecontrollerdb.txt` has been updated to the latest version
 
 ### Fixed
  - Analog values in the deadzone range will no longer be cut off and are 
