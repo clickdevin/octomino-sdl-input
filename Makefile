@@ -13,8 +13,8 @@ ZIPFILES = $(BIN) $(DBFILE) LICENSE README.md sources.zip
 ZIPSRC   = $(wildcard src/*.c) $(wildcard src/*.h) Makefile
 
 CC       = i686-w64-mingw32-gcc
-CFLAGS   = -O2 -flto -fvisibility=hidden \
-           -Wall -Wextra -Wpedantic -Wno-unused-parameter \
+CFLAGS   = -std=c11 -O2 -MMD -flto -fvisibility=hidden \
+           -Wall -Wextra -Wpedantic -Wshadow -Wno-unused-parameter \
            -DPLUGIN_NAME=\""$(NAME)"\" \
            -DPLUGIN_VERSION=\""$(VERSION)"\" \
            -DPLUGIN_REPO=\""$(REPO)"\"
@@ -23,6 +23,8 @@ LDFLAGS  = -shared -static-libgcc -static \
 
 $(BIN): $(SRC:.c=.o)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+
+-include $(SRC:.c=.d)
 
 $(DBFILE):
 	wget $(DBURL)
@@ -39,4 +41,4 @@ sources.zip: $(ZIPSRC)
 all: $(BIN) $(DBFILE) $(ZIPNAME)
 
 clean:
-	rm -f $(BIN) $(DBFILE) $(ZIPNAME) sources.zip $(SRC:.c=.o)
+	rm -f $(BIN) $(SRC:.c=.o) $(SRC:.c=.d) $(DBFILE) $(ZIPNAME) sources.zip
