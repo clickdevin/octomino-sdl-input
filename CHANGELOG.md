@@ -1,7 +1,7 @@
 Version History
 ===============
 
-0.1.1 (Unreleased)
+0.1.1 (2020-12-13)
 ------------------
 ### Added
  - Analog stick values should now be accurate to the range of N64 
