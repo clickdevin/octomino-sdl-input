@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "sdl_input.h"
+
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_gamecontroller.h>
-#include <stdarg.h>
-#include <time.h>
-#include <limits.h>
 
-FILE *logfile;
-char dbpath[PATH_MAX];
+#include "util.h"
+
+char dbpath[PATH_MAX] = {'\0'};
 
 int initialized = 0;
 SDL_GameController *con = NULL;
@@ -109,35 +108,6 @@ void close_controller(void)
     joy_inst = -1;
 }
 
-int16_t threshold(int16_t val, float cutoff)
-{
-    if (val < 0)
-        return val >= -(cutoff * 32767) ? 0 : val;
-    else
-        return val <= (cutoff * 32767) ? 0 : val;
-}
-
-int16_t scale_and_limit(int16_t val, float dz, float edge)
-{
-    // get abs value between 0 and 1 relative to deadzone and edge
-    float f = (abs(val) - dz * 32767) / (edge * 32767 - dz * 32767);
-
-    // out of range
-    if (f > 1.f) f = 1.f;
-    else if (f <= 0.f) return 0.f;
-
-    float sign = abs(val) / val;
-
-    return sign * f * 32767;
-}
-
-int16_t sclamp(int16_t val, int16_t min, int16_t max)
-{
-    if (val <= min) return min;
-    if (val >= max) return max;
-    return val;
-}
-
 void get_inputs(inputs_t *i)
 {
     if (!initialized)
@@ -211,23 +181,4 @@ void write_inputs(inputs_t *i)
     i->ary    = get_axis(SDL_CONTROLLER_AXIS_RIGHTY);
     i->altrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
     i->artrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
-}
-
-void dlog(const char *fmt, ...)
-{
-    time_t rawtime;
-    time(&rawtime);
-    struct tm *timeinfo = localtime(&rawtime);
-
-    char timestr[9];
-    strftime(timestr, sizeof(timestr), "%X", timeinfo);
-
-    fprintf(logfile, "[%s] ", timestr);
-
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(logfile, fmt, args);
-    va_end(args);
-
-    fprintf(logfile, "\n");
 }

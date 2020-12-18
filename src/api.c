@@ -6,8 +6,9 @@
 #include <Windows.h>
 #include <Shlwapi.h>
 #include <stdio.h>
-#include <math.h>
+
 #include "zilmar_controller_1.0.h"
+#include "util.h"
 #include "sdl_input.h"
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -65,18 +66,6 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo)
     );
 }
 
-static inline void n64_analog(BUTTONS *Keys, int16_t x, int16_t y)
-{
-    x = ((int32_t)x * 80) / 32767;
-    y = ((int32_t)y * 80) / 32767;
-
-    int16_t lim_x = 80 - (int16_t)round(abs(sclamp(y, -70, 70)) / 7. - 1. / 7);
-    int16_t lim_y = 80 - (int16_t)round(abs(sclamp(x, -70, 70)) / 7. - 1. / 7);
-
-    Keys->Y_AXIS = sclamp(x, -lim_x, lim_x);
-    Keys->X_AXIS = -sclamp(y, -lim_y, lim_y);
-}
-
 EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 {
     inputs_t i = {0};
@@ -100,11 +89,12 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->R_TRIG = threshold(i.artrig, 0.25f) > 0 || i.rshoul;
     Keys->L_TRIG = i.lshoul;
 
-    n64_analog(
-        Keys,
-        scale_and_limit(i.alx, 0.05f, 0.8f),
-        scale_and_limit(i.aly, 0.05f, 0.8f)
-    );
+    int16_t x = scale_and_limit(i.alx, 0.05f, 0.8f);
+    int16_t y = scale_and_limit(i.aly, 0.05f, 0.8f);
+    n64_analog(&x, &y);
+
+    Keys->Y_AXIS = y;
+    Keys->X_AXIS = x;
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])

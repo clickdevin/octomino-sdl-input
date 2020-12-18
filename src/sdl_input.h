@@ -5,29 +5,10 @@
 #ifndef OCTOMINO_SDL_INPUT_H_
 #define OCTOMINO_SDL_INPUT_H_
 
-#include <SDL2/SDL_version.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <limits.h>
 
-extern FILE *logfile;
 extern char dbpath[PATH_MAX];
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-#define SDL_VER_STRING \
-    TOSTRING(SDL_MAJOR_VERSION) "." \
-    TOSTRING(SDL_MINOR_VERSION) "." \
-    TOSTRING(SDL_PATCHLEVEL)
-
-#define PLUGIN_ABOUT   \
-    PLUGIN_NAME \
-    "\nVersion " PLUGIN_VERSION \
-    "\nCompiled on " __DATE__ " using SDL " SDL_VER_STRING  \
-    "\n\n" PLUGIN_REPO \
-    "\n\nLicensed under the Mozilla Public License 2.0" \
-    "\n(http://mozilla.org/MPL/2.0/)"
 
 typedef struct
 {
@@ -64,12 +45,8 @@ void init(void);
 void deinit(void);
 void open_controller(void);
 void close_controller(void);
-int16_t threshold(int16_t val, float cutoff);
-int16_t scale_and_limit(int16_t val, float dz, float edge);
-int16_t sclamp(int16_t val, int16_t min, int16_t max);
 void get_inputs(inputs_t *i);
 
 void write_inputs(inputs_t *i);
-void dlog(const char *fmt, ...);
 
 #endif
