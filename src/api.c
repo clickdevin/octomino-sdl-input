@@ -20,10 +20,13 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
         CreateDirectoryA("Logs", NULL);
         logfile = fopen("Logs\\" PLUGIN_NAME ".txt", "w");
 
-        // get path to gamecontroller.txt
-        GetModuleFileNameA(hinstDLL, dbpath, sizeof(dbpath));
-        PathRemoveFileSpecA(dbpath);
-        PathCombineA(dbpath, dbpath, "gamecontrollerdb.txt");
+        // get the dll's directory
+        char plugin_dir[PATH_MAX];
+        GetModuleFileNameA(hinstDLL, plugin_dir, sizeof(plugin_dir));
+        PathRemoveFileSpecA(plugin_dir);
+
+        // set path to gamecontroller.txt
+        PathCombineA(db_path, plugin_dir, "gamecontrollerdb.txt");
 
         break;
     case DLL_PROCESS_DETACH:
@@ -73,6 +76,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 
     Keys->Value = 0;
 
+    // hardcoded bindings for now
     Keys->R_DPAD = i.dright;
     Keys->L_DPAD = i.dleft;
     Keys->D_DPAD = i.ddown;
@@ -99,6 +103,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
+    // only setup controller 1 for now
     for (int i = 0; i < 4; ++i)
     {
         Controls[i].Present = FALSE;

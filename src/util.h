@@ -8,8 +8,6 @@
 #include <SDL2/SDL_version.h>
 #include <stdint.h>
 
-extern FILE *logfile;
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -26,8 +24,9 @@ extern FILE *logfile;
     "\n\nLicensed under the Mozilla Public License 2.0" \
     "\n(https://mozilla.org/MPL/2.0/)"
 
-void dlog(const char *fmt, ...);
+extern FILE *logfile;
 
+void dlog(const char *fmt, ...);
 int16_t threshold(int16_t val, float cutoff);
 int16_t scale_and_limit(int16_t val, float dz, float edge);
 int16_t sclamp(int16_t val, int16_t min, int16_t max);

@@ -7,14 +7,15 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_gamecontroller.h>
+#include <stdbool.h>
 
 #include "util.h"
 
-char dbpath[PATH_MAX] = {'\0'};
+char db_path[PATH_MAX] = {'\0'};
 
-int initialized = 0;
-SDL_GameController *con = NULL;
-int joy_inst = -1;
+static bool initialized = false;
+static SDL_GameController *con = NULL;
+static int joy_inst = -1;
 
 void try_init(void)
 {
@@ -28,13 +29,13 @@ void try_init(void)
            events so they don't clog up the log file */
         SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 
-        int mapcount = SDL_GameControllerAddMappingsFromFile(dbpath);
-        if (mapcount == -1)
-            dlog("    Unable to load mappings from %s", dbpath);
+        int map_count = SDL_GameControllerAddMappingsFromFile(db_path);
+        if (map_count == -1)
+            dlog("    Unable to load mappings from %s", db_path);
         else
-            dlog("    Successfully loaded %d mappings from %s", mapcount, dbpath);
+            dlog("    Successfully loaded %d mappings from %s", map_count, db_path);
 
-        initialized = 1;
+        initialized = true;
         dlog("    ...done");
     }
     else
@@ -48,7 +49,7 @@ void deinit(void)
 
     close_controller();
     SDL_Quit();
-    initialized = 0;
+    initialized = false;
 }
 
 void open_controller(void)
@@ -108,14 +109,44 @@ void close_controller(void)
     joy_inst = -1;
 }
 
-void get_inputs(inputs_t *i)
+static inline uint8_t get_but(SDL_GameControllerButton b)
 {
-    if (!initialized)
-    {
-        try_init();
-        if (!initialized) return;
-    }
+    return SDL_GameControllerGetButton(con, b);
+}
 
+static inline int16_t get_axis(SDL_GameControllerAxis a)
+{
+    return sclamp(SDL_GameControllerGetAxis(con, a), -32767, 32767);
+}
+
+static void write_inputs(inputs_t *i)
+{
+    i->a      = get_but(SDL_CONTROLLER_BUTTON_A);
+    i->b      = get_but(SDL_CONTROLLER_BUTTON_B);
+    i->x      = get_but(SDL_CONTROLLER_BUTTON_X);
+    i->y      = get_but(SDL_CONTROLLER_BUTTON_Y);
+    i->back   = get_but(SDL_CONTROLLER_BUTTON_BACK);
+    i->guide  = get_but(SDL_CONTROLLER_BUTTON_GUIDE);
+    i->start  = get_but(SDL_CONTROLLER_BUTTON_START);
+    i->lstick = get_but(SDL_CONTROLLER_BUTTON_LEFTSTICK);
+    i->rstick = get_but(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+    i->lshoul = get_but(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+    i->rshoul = get_but(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+    i->dup    = get_but(SDL_CONTROLLER_BUTTON_DPAD_UP);
+    i->ddown  = get_but(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+    i->dleft  = get_but(SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+    i->dright = get_but(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+
+    i->alx    = get_axis(SDL_CONTROLLER_AXIS_LEFTX);
+    i->aly    = get_axis(SDL_CONTROLLER_AXIS_LEFTY);
+    i->arx    = get_axis(SDL_CONTROLLER_AXIS_RIGHTX);
+    i->ary    = get_axis(SDL_CONTROLLER_AXIS_RIGHTY);
+    i->altrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+    i->artrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+}
+
+static void poll_events(void)
+{
     SDL_Event e;
     while (SDL_PollEvent(&e))
         switch (e.type)
@@ -142,43 +173,18 @@ void get_inputs(inputs_t *i)
                 dlog("    ...it was not the active controller");
             break;
         }
+}
+
+void get_inputs(inputs_t *i)
+{
+    if (!initialized)
+    {
+        try_init();
+        if (!initialized) return;
+    }
+
+    poll_events();
 
     if (con != NULL)
         write_inputs(i);
-}
-
-static inline uint8_t get_but(SDL_GameControllerButton b)
-{
-    return SDL_GameControllerGetButton(con, b);
-}
-
-static inline int16_t get_axis(SDL_GameControllerAxis a)
-{
-    return sclamp(SDL_GameControllerGetAxis(con, a), -32767, 32767);
-}
-
-void write_inputs(inputs_t *i)
-{
-    i->a      = get_but(SDL_CONTROLLER_BUTTON_A);
-    i->b      = get_but(SDL_CONTROLLER_BUTTON_B);
-    i->x      = get_but(SDL_CONTROLLER_BUTTON_X);
-    i->y      = get_but(SDL_CONTROLLER_BUTTON_Y);
-    i->back   = get_but(SDL_CONTROLLER_BUTTON_BACK);
-    i->guide  = get_but(SDL_CONTROLLER_BUTTON_GUIDE);
-    i->start  = get_but(SDL_CONTROLLER_BUTTON_START);
-    i->lstick = get_but(SDL_CONTROLLER_BUTTON_LEFTSTICK);
-    i->rstick = get_but(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
-    i->lshoul = get_but(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
-    i->rshoul = get_but(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-    i->dup    = get_but(SDL_CONTROLLER_BUTTON_DPAD_UP);
-    i->ddown  = get_but(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-    i->dleft  = get_but(SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-    i->dright = get_but(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-
-    i->alx    = get_axis(SDL_CONTROLLER_AXIS_LEFTX);
-    i->aly    = get_axis(SDL_CONTROLLER_AXIS_LEFTY);
-    i->arx    = get_axis(SDL_CONTROLLER_AXIS_RIGHTX);
-    i->ary    = get_axis(SDL_CONTROLLER_AXIS_RIGHTY);
-    i->altrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-    i->artrig = get_axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
 }

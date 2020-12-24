@@ -8,8 +8,6 @@
 #include <stdint.h>
 #include <limits.h>
 
-extern char dbpath[PATH_MAX];
-
 typedef struct
 {
     uint16_t a       : 1;
@@ -41,12 +39,12 @@ typedef struct
     int16_t artrig;
 } inputs_t;
 
+extern char db_path[PATH_MAX];
+
 void init(void);
 void deinit(void);
 void open_controller(void);
 void close_controller(void);
 void get_inputs(inputs_t *i);
-
-void write_inputs(inputs_t *i);
 
 #endif
