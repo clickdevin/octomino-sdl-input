@@ -16,6 +16,7 @@ CC       = i686-w64-mingw32-gcc
 CFLAGS   = -std=c11 -O2 -MMD -flto -fvisibility=hidden \
            -Wall -Wextra -Wpedantic -Wshadow -Wno-unused-parameter \
            -DPLUGIN_NAME=\""$(NAME)"\" \
+		   -DPLUGIN_SHORT_NAME=\""$(BIN:.dll=)"\" \
            -DPLUGIN_VERSION=\""$(VERSION)"\" \
            -DPLUGIN_REPO=\""$(REPO)"\"
 LDFLAGS  = -s -shared -static-libgcc -static \

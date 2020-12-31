@@ -10,6 +10,7 @@
                 "UNICODE",
                 "_UNICODE",
                 "PLUGIN_NAME=\"\"",
+                "PLUGIN_SHORT_NAME=\"\"",
                 "PLUGIN_VERSION=\"\"",
                 "PLUGIN_REPO=\"\""
             ],

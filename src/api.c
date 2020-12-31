@@ -16,9 +16,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        // make a log file
         CreateDirectoryA("Logs", NULL);
-        logfile = fopen("Logs\\" PLUGIN_NAME ".txt", "w");
+        // rename the old log file if it exists
+        remove("Logs\\" PLUGIN_SHORT_NAME ".prev.txt");
+        rename("Logs\\" PLUGIN_SHORT_NAME ".txt", "Logs\\" PLUGIN_SHORT_NAME ".prev.txt");
+        // make the log file
+        logfile = fopen("Logs\\" PLUGIN_SHORT_NAME ".txt", "w");
 
         // get the dll's directory
         char plugin_dir[PATH_MAX];
