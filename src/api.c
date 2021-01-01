@@ -10,6 +10,9 @@
 #include "zilmar_controller_1.0.h"
 #include "util.h"
 #include "sdl_input.h"
+#include "conf.h"
+
+static HWND win = NULL;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
@@ -28,8 +31,16 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
         GetModuleFileNameA(hinstDLL, plugin_dir, sizeof(plugin_dir));
         PathRemoveFileSpecA(plugin_dir);
 
-        // set path to gamecontroller.txt
+        // path to controller db
         PathCombineA(db_path, plugin_dir, "gamecontrollerdb.txt");
+        // path to config file
+        PathCombineA(conf_path, plugin_dir, PLUGIN_SHORT_NAME ".conf");
+
+        conf_load();
+        conf.inner_dz = fclamp(conf.inner_dz, 0.f, 1.f);
+        conf.outer_dz = fclamp(conf.outer_dz, 0.f, 1.f);
+        conf.trig_thres = fclamp(conf.trig_thres, 0.f, 1.f);
+        conf.stick_thres = fclamp(conf.stick_thres, 0.f, 1.f);
 
         break;
     case DLL_PROCESS_DETACH:
@@ -79,26 +90,38 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 
     Keys->Value = 0;
 
+    if (conf.require_focus && GetActiveWindow() != win)
+        return;
+
     // hardcoded bindings for now
     Keys->R_DPAD = i.dright;
     Keys->L_DPAD = i.dleft;
     Keys->D_DPAD = i.ddown;
     Keys->U_DPAD = i.dup;
     Keys->START_BUTTON = i.start;
-    Keys->Z_TRIG = threshold(i.altrig, 0.25f) > 0;
+    Keys->Z_TRIG = threshold(i.altrig, conf.trig_thres) > 0;
     Keys->A_BUTTON = i.a || i.b;
     Keys->B_BUTTON = i.x || i.y;
 
-    Keys->R_CBUTTON = threshold(i.arx, 0.25f) > 0;
-    Keys->L_CBUTTON = threshold(i.arx, 0.25f) < 0;
-    Keys->D_CBUTTON = threshold(i.ary, 0.25f) > 0;
-    Keys->U_CBUTTON = threshold(i.ary, 0.25f) < 0;
-    Keys->R_TRIG = threshold(i.artrig, 0.25f) > 0 || i.rshoul;
+    Keys->R_CBUTTON = threshold(i.arx, conf.stick_thres) > 0;
+    Keys->L_CBUTTON = threshold(i.arx, conf.stick_thres) < 0;
+    Keys->D_CBUTTON = threshold(i.ary, conf.stick_thres) > 0;
+    Keys->U_CBUTTON = threshold(i.ary, conf.stick_thres) < 0;
+    Keys->R_TRIG = threshold(i.artrig, conf.trig_thres) > 0 || i.rshoul;
     Keys->L_TRIG = i.lshoul;
 
-    int16_t x = scale_and_limit(i.alx, 0.05f, 0.8f);
-    int16_t y = scale_and_limit(i.aly, 0.05f, 0.8f);
-    n64_analog(&x, &y);
+    // analog stick stuff
+    int16_t x = scale_and_limit(i.alx, conf.inner_dz, conf.outer_dz);
+    int16_t y = scale_and_limit(i.aly, conf.inner_dz, conf.outer_dz);
+    
+    if (conf.use_n64_range)
+        n64_analog(&x, &y);
+    else
+    {
+        int16_t old_y = y;
+        y = x;
+        x = -old_y;
+    }
 
     Keys->Y_AXIS = y;
     Keys->X_AXIS = x;
@@ -106,6 +129,8 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
+    win = hMainWindow;
+
     // only setup controller 1 for now
     for (int i = 0; i < 4; ++i)
     {

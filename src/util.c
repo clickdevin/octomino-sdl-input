@@ -61,6 +61,13 @@ int16_t sclamp(int16_t val, int16_t min, int16_t max)
     return val;
 }
 
+float fclamp(float val, float min, float max)
+{
+    if (val <= min) return min;
+    if (val >= max) return max;
+    return val;
+}
+
 void n64_analog(int16_t *x, int16_t *y)
 {
     *x = ((int32_t)(*x) * 80) / 32767;

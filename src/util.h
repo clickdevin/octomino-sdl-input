@@ -30,6 +30,7 @@ void dlog(const char *fmt, ...);
 int16_t threshold(int16_t val, float cutoff);
 int16_t scale_and_limit(int16_t val, float dz, float edge);
 int16_t sclamp(int16_t val, int16_t min, int16_t max);
+float fclamp(float val, float min, float max);
 void n64_analog(int16_t *x, int16_t *y);
 
 #endif
